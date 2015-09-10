@@ -11,7 +11,7 @@ pw = prompt("Gmail Password: ")
 recipients = "arohrer6@gmail.com"
 
 
-with open("NFLpicks.html") as picks:
+with open("generated-data/NFLpicks.html") as picks:
 	html = """\
 <html>
 	<head></head>

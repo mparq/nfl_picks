@@ -31,6 +31,8 @@ STAT_MAP = {stat: i for i, stat in enumerate(STAT_LISTING)}
 
 FLOCKS_REGEX = '<TR>[^<]*<TD>(.*?)</TD>[^<]*<TD>(.*?)</TD>[^<]*<TD>(.*?)</TD>[^<]*<TD>(.*?)</TD>[^<]*<TD>(.*?)</TD>'
 
+OUT_DIR = "generated-data"
+
 def convertTeamNameToCity(name):
     if name.startswith("New York"):
         return "NY" + name[8:]
@@ -40,7 +42,7 @@ def convertTeamNameToCity(name):
     return " ".join(city)
 
 def writeFile(rows, file_name="NFLpicks", file_type=".csv"):
-    out = open(file_name + file_type, 'w')
+    out = open(OUT_DIR + "/" + file_name + file_type, 'w')
     headers = rows[0]
     del rows[0]
 
