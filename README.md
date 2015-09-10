@@ -1,13 +1,5 @@
 # NFL Picks
 
-## Usage
-
-`python3 NFLpicks.py`
-
-When prompted, enter next Sunday's date (this will probably be changed in the future).
-
-After the tool completes, a .csv file will be exported containing the combined data of ESPN and the betting line site, resulting in a table of teams with their corresponding records and the lines for eachs project was one I picked up to help my friend. He needed to pull some data from ESPN and betting line sites to combine team data with line data.
-
 ## Context
 
 Each week, oddsmakers will hash out "lines" on football games based on how people are betting on each team. These lines indicate how much one team is favored by over the other. For example, if the Falcons are playing the panthers and the Falcons are favored by a touchdown, the line would be Falcons -7. 7 points will be subtracted from the Falcons' final score and that score will be compared to the Panthers' score to determine which team "won" the line. The goal of the lines is to make it so that "winning" is a 50/50 affair. Obviously, since these lines are set based on how people bet on the games, this does not always occur. Our goal with this little game is to send out "picks" each week to a number of our friends. Each of them will choose 9 games of the 13-14 possible games that week and pick the team they think will win the line for each game. At the end of the year, everybody's ratios are calculated so we can see how well we can beat the line. So far, not well.
