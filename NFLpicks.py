@@ -99,7 +99,10 @@ def pickEm(date): # date = str(MM/DD)
         else: #if underdog is home
             last = last[3:]
             first, last = last, first
-        
+            line = str(-float(line)).strip(".0")
+        if not line.startswith("-"):
+            line = "+" + line
+        print(line)
         homeFirst.append([date, first, line, last, ou])
     
     #print(homeFirst)
@@ -134,7 +137,7 @@ else:
     print("Something went wrong. Uncomment print statements")
 
     
-
+print("hello")
 
 
 
