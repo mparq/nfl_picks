@@ -1,6 +1,9 @@
 import urllib.request
 import re
 import csv
+import bs4
+import requests
+
 
 DATE = "09/13"
 
@@ -36,7 +39,6 @@ OUT_DIR = "generated-data"
 def convertTeamNameToCity(name):
     if name.startswith("New York"):
         return "NY" + name[8:]
-    print(name)
     city = name.split()
     city = city[:len(city)-1]
     return " ".join(city)
@@ -76,28 +78,38 @@ def pickEm(date): # date = str(MM/DD)
         monDate = str(month+1)+'/01'
     else:
         monDate = str(month) + '/' + str(day+1)
-    htmlStr = str(urllib.request.urlopen('http://www.footballlocks.com/nfl_lines.shtml').read())
-    rows = re.findall(FLOCKS_REGEX, htmlStr) 
+    
+    r = requests.get('http://www.footballlocks.com/nfl_lines.shtml')
 
-    #print(rows)
-    #self.date.delete(0,END)
-    #var = IntVar()
-    
-    
-    lists = []
-    for tup in rows:
-        lists.append(list(tup))
-    #print(lists)
-    
+
+    soup = bs4.BeautifulSoup(r.text, "html.parser")
+
+    lines = []
+
+    for table in soup.find_all('table', cols='5'):
+        for tr in table.find_all('tr'):
+            line = []
+            for td in tr.find_all('td'):
+                line.append(td.get_text())
+
+            # need condition to ignore blank styling row
+            if '' not in line:
+                lines.append(line)    
 
     homeFirst = []
     teams = [] # list for use in grabbing records
-    for date, first, line, last, ou in lists: # row = [favorite, line, underdog]
+    for date, first, line, last, ou in lines[1:]: # row = [favorite, line, underdog]
         
-        if first.startswith('At'): #if favored team is home
+        if first.startswith('At '): #if favored team is home
             first = first[3:]
         else: #if underdog is home
-            last = last[3:]
+
+            # fucking london
+            if '(at London)' in last:
+                last = last[:last.find('(at London)')]
+            else:
+                last = last[3:]
+
             first, last = last, first
             line = str(-float(line)).strip(".0")
         if not line.startswith("-"):
@@ -105,39 +117,37 @@ def pickEm(date): # date = str(MM/DD)
         print(line)
         homeFirst.append([date, first, line, last, ou])
     
-    #print(homeFirst)
-
     records = {}
     espnUrl = 'http://espn.go.com/nfl/standings'
     espnStr = urllib.request.urlopen(espnUrl).read().decode()
 
     for row in re.findall(ESPN_REGEX, espnStr):
         stats[convertTeamNameToCity(row[STAT_MAP["TEAM_NAME"]])] = row
-    #print(records)
 
-    print(homeFirst)
-    print(sorted(stats.keys()))
+    errors = 0
 
     for i in range(len(homeFirst)): #use homeFirst instead of teams to append the record to homeFirst
-        homeFirst[i][1] = homeFirst[i][1]+' ('+stats[homeFirst[i][1]][3]+'-'+stats[homeFirst[i][1]][4]+'-'+stats[homeFirst[i][1]][5]+')' #first element of each row. 
-        homeFirst[i][3] = homeFirst[i][3]+' ('+stats[homeFirst[i][3]][3]+'-'+stats[homeFirst[i][3]][4]+'-'+stats[homeFirst[i][3]][5]+')'
-    #print(homeFirst)
+        try:
+            homeFirst[i][1] = homeFirst[i][1]+' ('+stats[homeFirst[i][1]][3]+'-'+stats[homeFirst[i][1]][4]+'-'+stats[homeFirst[i][1]][5]+')' #first element of each row. 
+            homeFirst[i][3] = homeFirst[i][3]+' ('+stats[homeFirst[i][3]][3]+'-'+stats[homeFirst[i][3]][4]+'-'+stats[homeFirst[i][3]][5]+')'
+        except:
+            errors += 1
+            print('Error: {}'.format(homeFirst[i]))
 
     headers = ['Date', 'Home','Line','Away', 'O/U']
 
     writeFile([headers] + homeFirst)
     writeFile([headers] + homeFirst, file_type = ".html")
 
-    return len(lists)
+    return errors
 
 date = DATE
-if pickEm(date) > 2:
+
+errors = pickEm(date)
+if errors == 0:
     print("Everything went smoothly. Check NFLpicks.csv file")
 else:
-    print("Something went wrong. Uncomment print statements")
-
-    
-print("hello")
+    print("There were {} errors in this run. Check print statements".format(errors))
 
 
 

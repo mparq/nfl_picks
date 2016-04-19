@@ -28,12 +28,14 @@ with open("generated-data/NFLpicks.html") as picks:
 	msg = MIMEText(html.format(picks.read()), 'html')
 
 msg['Subject'] = 'NFL Picks'
-msg['From'] = "the god"
+msg['From'] = "thegod@kami.jp"
 msg['To'] = recipients
 
-s = smtplib.SMTP('gmail.com')
-s.ehlo()
+s = smtplib.SMTP('smtp.gmail.com:587')
 s.starttls()
+print('logging in...')
 s.login(me, pw)
-s.sendmail(msg)
+print('logged in...')
+print('sending mail...')
+s.send_message(msg)
 s.quit()
